@@ -1,0 +1,45 @@
+From e8d4f9171048a49f9049b33a0674123f7c1fc1f1 Mon Sep 17 00:00:00 2001
+From: notsyncing <song.fc@gmail.com>
+Date: Mon, 24 Sep 2018 17:28:36 +0800
+Subject: [PATCH] init: Add install_keyring command.
+
+This is required for TWRP on FBE devices.
+Ported from commit acc5341 on android-8.1 branch.
+
+Change-Id: I29df04f188abbb4690e1b91d4c124b1d4b0f7596
+---
+ init/builtins.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/init/builtins.cpp b/init/builtins.cpp
+index 8bd92ccdd..edc8afd60 100644
+--- a/init/builtins.cpp
++++ b/init/builtins.cpp
+@@ -1020,6 +1020,16 @@ static Result<Success> do_installkey(const BuiltinArguments& args) {
+         {{"exec", "/system/bin/vdc", "--wait", "cryptfs", "enablefilecrypto"}, args.context});
+ }
+ 
++static Result<Success> do_install_keyring(const BuiltinArguments& args) {
++    if (e4crypt_install_keyring()) {
++        LOG(ERROR) << "failed to install keyring";
++        return Error() << "e4crypt_install_keyring() failed";
++    }
++    property_set("ro.crypto.state", "encrypted");
++    property_set("ro.crypto.type", "file");
++    return Success();
++}
++
+ static Result<Success> do_init_user0(const BuiltinArguments& args) {
+     return ExecWithRebootOnFailure(
+         "init_user0_failed",
+@@ -1050,6 +1060,7 @@ const BuiltinFunctionMap::Map& BuiltinFunctionMap::map() const {
+         {"init_user0",              {0,     0,    {false,  do_init_user0}}},
+         {"insmod",                  {1,     kMax, {true,   do_insmod}}},
+         {"installkey",              {1,     1,    {false,  do_installkey}}},
++        {"install_keyring",         {0,     0,    {false,  do_install_keyring}}},
+         {"load_persist_props",      {0,     0,    {false,  do_load_persist_props}}},
+         {"load_system_props",       {0,     0,    {false,  do_load_system_props}}},
+         {"loglevel",                {1,     1,    {false,  do_loglevel}}},
+-- 
+2.17.1
+

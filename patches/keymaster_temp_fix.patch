@@ -1,0 +1,20 @@
+
+project hardware/interfaces/
+diff --git a/keymaster/4.0/support/Keymaster.cpp b/keymaster/4.0/support/Keymaster.cpp
+index 9325cc0..b6ef386 100644
+--- a/keymaster/4.0/support/Keymaster.cpp
++++ b/keymaster/4.0/support/Keymaster.cpp
+@@ -111,11 +111,10 @@ Keymaster::KeymasterSet Keymaster::enumerateAvailableDevices() {
+     CHECK(serviceManager) << "Could not retrieve ServiceManager";
+ 
+     auto km4s = enumerateDevices<Keymaster4>(serviceManager);
+-    auto km3s = enumerateDevices<Keymaster3>(serviceManager);
+ 
+     auto result = std::move(km4s);
+-    result.insert(result.end(), std::make_move_iterator(km3s.begin()),
+-                  std::make_move_iterator(km3s.end()));
++    result.insert(result.end(), std::make_move_iterator(km4s.begin()),
++                  std::make_move_iterator(km4s.end()));
+ 
+     std::sort(result.begin(), result.end(),
+               [](auto& a, auto& b) { return a->halVersion() > b->halVersion(); });

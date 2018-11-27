@@ -1,0 +1,42 @@
+
+project bootable/recovery/
+diff --git a/crypto/ext4crypt/Decrypt.cpp b/crypto/ext4crypt/Decrypt.cpp
+index 3eeaaf8..f64a0ce 100644
+--- a/crypto/ext4crypt/Decrypt.cpp
++++ b/crypto/ext4crypt/Decrypt.cpp
+@@ -1319,11 +1319,11 @@ bool Decrypt_User(const userid_t user_id, const std::string& Password) {
+     ret = gk_device->verify(gk_device, user_id, 0, (const uint8_t *)handle.c_str(), st.st_size,
+                 (const uint8_t *)Password.c_str(), (uint32_t)Password.size(), &auth_token, &auth_token_len,
+                 &should_reenroll);
++#endif
+     if (ret !=0) {
+-		printf("failed to verify\n");
++		printf("failed to verify, ret=%d\n", ret);
+ 		return false;
+ 	}
+-#endif
+ 	char token_hex[(auth_token_len*2)+1];
+ 	token_hex[(auth_token_len*2)] = 0;
+ 	uint32_t i;
+@@ -1336,7 +1336,7 @@ bool Decrypt_User(const userid_t user_id, const std::string& Password) {
+ 		printf("e4crypt_unlock_user_key returned fail\n");
+ 		return false;
+ 	}
+-	if (!e4crypt_prepare_user_storage(nullptr, user_id, 0, flags)) {
++	if (!e4crypt_prepare_user_storage("", user_id, 0, flags)) {
+ 		printf("failed to e4crypt_prepare_user_storage\n");
+ 		return false;
+ 	}
+diff --git a/minuitwrp/graphics_fbdev.cpp b/minuitwrp/graphics_fbdev.cpp
+index a1c42d0..d472fc7 100644
+--- a/minuitwrp/graphics_fbdev.cpp
++++ b/minuitwrp/graphics_fbdev.cpp
+@@ -288,7 +288,7 @@ static GRSurface* fbdev_flip(minui_backend* backend __unused) {
+     unsigned int idx;
+     unsigned char tmp;
+     unsigned char* ucfb_vaddr = (unsigned char*)gr_draw->data;
+-    for (idx = 0 ; idx < (gr_draw->height * gr_draw->row_bytes);
++    for (idx = 0 ; idx < (unsigned int)(gr_draw->height * gr_draw->row_bytes);
+             idx += 4) {
+         tmp = ucfb_vaddr[idx];
+         ucfb_vaddr[idx    ] = ucfb_vaddr[idx + 2];
